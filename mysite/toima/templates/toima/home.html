@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title>Toima</title>
+    </head>
+    <body>
+        <h1>The Official Messaging Application</h1>
+        <p style="text-align: left; width: 49%; display: inline-block;">
+            {% if user.is_superuser %}
+                <a href="{% url 'toima:administration' %}">Administration</a>
+            {% endif %}
+        </p>
+        <div style="text-align: right; width: 50%; display: inline-block;">
+            <i>Logged in as {{ user.username }}.</i>
+            <form
+                style="display: inline;"
+                action="{% url 'logout' %}" method="post"
+            >
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+
+        {% if cr_rec %}
+        <h2>New contact requests</h2>
+        {% for c in cr_rec %}
+            <form
+                action="{% url 'toima:answerRequest' c.id %}"
+                method="POST">
+                {% csrf_token %}
+                <fieldset>
+                <legend>
+                    <input type="submit" name="accept" value="Accept">
+                    <span> or </span>
+                    <input type="submit" name="reject" value="Reject">
+                    <span>
+                        a contact request 
+                        from <b>{{ c.sender }}</b> 
+                        at {{ c.was_sent}}
+                    </span>                    
+                </legend>
+                <!-- FLAW 3 Step 2: remove the filter '|safe' in the following line -->
+                <p>{{ c.msg|safe }}</p>
+                <p>
+                    <label for="rr_message" style="vertical-align: top" >Answer:</label>
+                    <textarea name="msg_answer" id="rr_message" cols="60" rows="2"></textarea>
+                </p>
+            </fieldset>
+            </form>
+        {% endfor %}
+        {% endif %}
+
+        {% if cr_ans %}
+        <h2>New answers to your contact requests</h2>
+        {% for c in cr_ans %}
+            <form
+                action="{% url 'toima:readAnswer' c.id %}"
+                method="POST">
+            {% csrf_token %}
+            <fieldset>
+                <legend>
+                    <input type="submit" value="Ok">
+                    <span> 
+                        <b>{{ c.receiver }}</b>
+                        {% if c.is_accepted %}
+                            accepted
+                        {% else %}
+                            rejected
+                        {% endif %}
+                        your contact request at {{ c.was_answered }}
+                    </span>                    
+                </legend>
+                <p>{{ c.msg_answer }}</p>
+            </fieldset>
+            </form>
+        {% endfor %}
+        {% endif %}
+
+        {% if contacts %}
+        <h2>Contacts</h2>
+        <ul>
+        {% for c in contacts %}
+        <li>
+            <a href="{% url 'toima:messaging' c.contact.id %}">{{ c.contact }}</a>
+            {% if c.new_messages_count > 0 %}
+                {% if c.new_messages_count == 1 %}
+                    <i> - New message!</i>
+                {% else %}
+                <i> - {{ c.new_messages_count }} new messages!</i>
+                {% endif %}
+            {% endif %}
+        </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+
+        <h2>Send a new contact request</h2>
+        <form
+            action="{% url 'toima:sendRequest' %}" method="POST"
+        >
+            {% csrf_token %}
+            <p>
+                <label for="sr_username">Username:</label>
+                <input type="text" name="username" maxlength="20" id="sr_username">
+            </p>
+            <p>
+                <label for="sr_message" style="vertical-align: top" >Message:</label>
+                <textarea name="message" id="sr_message" cols="60" rows="3"></textarea>
+            </p>
+            <input type="submit" value="Submit"/>
+        </form>
+    </body>
+</html>

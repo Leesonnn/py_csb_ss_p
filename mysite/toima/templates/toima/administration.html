@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title>Toima</title>
+    </head>
+    <body>
+        <h1>The Official Messaging Application</h1>
+        <p style="text-align: left; width: 49%; display: inline-block;">
+            <a href="{% url 'toima:home' %}">Home</a>
+        </p>
+        <div style="text-align: right; width: 50%; display: inline-block;">
+            <i>Logged in as {{ user.username }}.</i>
+            <form
+                style="display: inline;"
+                action="{% url 'logout' %}" method="post"
+            >
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+        <h2>Administration</h2>
+        <table>
+            <tr>
+                <th>username</th>
+                <th>state</th>
+                <th>superuser</th>
+            </tr>
+            {% for u in users %}
+                <tr>
+                    <td>{{ u.username }}</td>
+                    <td><form
+                        action="{% url 'toima:administrationState' u.id %}" method="post"
+                    >
+                        {% csrf_token %}
+                        {% if u.is_active %}
+                            <input type="submit" value="Deactivate">
+                        {% else %}
+                            <input type="submit" value="Activate">
+                        {% endif %}
+                    </form></td>
+                    <td>{{ u.is_superuser }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </body>
+</html>

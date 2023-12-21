@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title>Toima</title>
+    </head>
+    <body>
+        <h1>The Official Messaging Application</h1>
+        <p style="text-align: left; width: 49%; display: inline-block;">
+            <a href="{% url 'toima:home' %}">Home</a>
+        </p>
+        <div style="text-align: right; width: 50%; display: inline-block;">
+            <i>Logged in as {{ user.username }}.</i>
+            <form
+                style="display: inline;"
+                action="{% url 'logout' %}" method="post"
+            >
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+
+        <h2 style="text-align: left; width: 49%; display: inline-block;">
+            {{ contact.username }}
+        </h2>
+        <h2 style="text-align: right; width: 50%; display: inline-block;">me</h2>
+
+        <form
+            action="{% url 'toima:messagingSend' contact.id %}"
+            method="POST">
+            {% csrf_token %}
+            <textarea style="text-align: right; width: 99%;" name="msg" id="msg"  rows="4"></textarea>
+            <input style="text-align: center; width: 100%;" type="submit" name="send" value="Send">
+        </form>
+
+        {% if messages %}
+        {% for m in messages %}
+            {% if m.sender == user %}
+            <p style="text-align: left; width: 25%; display: inline-block;"></p>
+            <p style="text-align: right; width: 74%; display: inline-block;">
+            {% else %}
+            <p style="text-align: left; width: 74%; display: inline-block;">
+            {% endif %}
+
+                {{ m.was_sent }}
+                {% if forloop.counter0 < new_count %}
+                    <b> NEW!</b>
+                {% endif %}
+
+                <br> {{ m.msg }}
+            </p>
+
+            {% if m.sender != user %}
+            <p style="text-align: left; width: 25%; display: inline-block;"></p>
+            {% endif %}
+        {% endfor %}
+        {% endif %}
+    </body>
+</html>
